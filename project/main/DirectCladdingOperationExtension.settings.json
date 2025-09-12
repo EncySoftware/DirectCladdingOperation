@@ -1,0 +1,14 @@
+{
+    "name": "DirectCladding operation extensions",
+    "description": "Extensions to calculate tool path for DirectCladding",
+    "module_path": "${extensionJsonFolder}/DirectCladdingOperationExtension.dll",
+    "extensions": [
+        {
+            "OperationSolver": {
+                "name": "DirectCladding operation extension",
+                "caption": "Extensions to calculate tool path for DirectCladding",
+                "id": "DirectCladdingOperationExtension.ToolPathCalculation"
+            }
+        }
+    ]
+}

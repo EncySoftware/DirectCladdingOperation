@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<SCCollection>
+
+    <SCNameSpace ID="OperationRegistrator">
+        <SCType ID="RegTDirectCladdingOP" type="TRegisterOperationRecord" Enabled="True">
+            <TypeName DefaultValue="TDirectCladdingOP"/>
+        </SCType>
+    </SCNameSpace>
+
+    <SCType ID="TDirectCladdingOP" Caption="Direct cladding" type="TSTMillExtensionOp" Enabled = "True">
+        <GUID DefaultValue="{bf3b28cf-b290-40b7-b27a-739e8cb8e83c}"/>
+        <SolverID DefaultValue="DirectCladdingOperationExtension.ToolPathCalculation"/>
+
+        <!-- Header -->
+        <Name DefaultValue="Direct cladding"/>
+        <Comment DefaultValue="Direct cladding"/>
+        <Image DefaultValue="$(SUPPLEMENT_FOLDER)\operations\MillOperations\Images\CurveCladding.bmp"/>
+        <Icon DefaultValue="$(SUPPLEMENT_FOLDER)\operations\MillOperations\Images\CurveCladding_Ico.bmp"/>
+        <Video DefaultValue="$(SUPPLEMENT_FOLDER)\operations\MillOperations\Video\Knife5D.wmv"/>
+        <OperationGroup DefaultValue="Mill"/>
+        <MultiGroup>
+            <SCType ID="Additive" OrderInGroup="10" type="TLinkToParentMultiGroup"/>
+        </MultiGroup>
+        <RestMode DefaultValue="Off"/>
+
+        <CheckedGeometry Enabled="False"/>
+        <FeedSwitchLevel Enabled="True">
+            <ReferenceType DefaultValue="PercentDTool">
+                <Absolute Enabled="False"/>
+                <Percent Enabled="False"/>
+            </ReferenceType>
+        </FeedSwitchLevel>
+        <LinksPlaceHolder Enabled="True"/>
+        <LeadsPlaceHolder Enabled="False"/>
+        <Tolerances Enabled="False"/>
+        <Stock Enabled="False"/>
+
+        <CustomizedMachiningApplications>
+            <SupportedApplications>
+                <MillTool DefaultValue="false"/>
+                <LatheCutter DefaultValue="false"/>
+                <JetCutter DefaultValue="false"/>
+                <Punch DefaultValue="false"/>
+                <Wire DefaultValue="false"/>
+                <Cutter6D DefaultValue="false"/>
+                <Welder DefaultValue="false"/>
+                <AdditiveTool DefaultValue="true"/>
+                <HeatTreatment DefaultValue="false"/>
+                <Painter DefaultValue="false"/>
+            </SupportedApplications>
+        </CustomizedMachiningApplications>
+
+        <ConditionsSection>
+            <!-- <Feeds Transparent="NOT [UseMWFeeds]" Visible="NOT [UseMWFeeds]">
+                <ReturnFeed>
+                    <SCType ID="RapidReturn" Caption="Return on the rapid feed" type="Boolean" DefaultValue="False"/>
+                </ReturnFeed>
+            </Feeds> -->
+            <Feeds>
+                <NextFeed Enabled="True"/>
+            </Feeds>
+        </ConditionsSection>
+
+        <ToolSection>
+            <SupportedToolTypes>
+                <EndMill Enabled="True"/>
+                <Spherical Enabled="False"/>
+                <Torus Enabled="True"/>
+                <DblRadius Enabled="False"/>
+                <TrimDblRadius Enabled="False"/>
+                <Angle Enabled="False"/>
+                <TrimAngle Enabled="False"/>
+                <Grooving Enabled="False"/>
+                <Drill Enabled="False"/>
+                <Complex Enabled="False"/>
+                <NegativeRad Enabled="False"/>
+                <Cutter Enabled="True"/>
+                <Tap Enabled="False"/>
+                <CenterDrill Enabled="False"/>
+                <CounterSink Enabled="False"/>
+                <CounterBore Enabled="False"/>
+                <Reamer Enabled="False"/>
+                <ThreadMill Enabled="False"/>
+                <CustomMill Enabled="True"/>
+                <UndercutTool Enabled="False"/>
+                <BoringTool Enabled="False"/>
+				<SpotDrill Enabled="False"/>
+				<KnifeTool Enabled="False"/>
+				<LaserTool Enabled="False"/>
+            </SupportedToolTypes>
+        </ToolSection>
+
+        <Simulation>
+            <SimulationType DefaultValue="Additive"/>
+        </Simulation>
+
+        <Toolpath>
+			<Output>
+				<WorksOutput Visible="true"  UseNewHelics="True" ArcsByDefault="True" Caption="Output interpolation">
+					<AngularError DefaultValue="0.02"/>		
+					<LinearError Visible="not ([Mode]=[Mode.OldArcs])"/>	
+				</WorksOutput>			
+				<LinksOutput Visible="false"/>	
+				<!-- <MinimumLayerTime Visible="True"/>	 -->
+			</Output>
+		</Toolpath>
+                
+        <SCType ID="PrintingStrategy" Caption="Printing strategy" type="Enumerated" DefaultValue="Planar"
+            ImageFile="$(SUPPLEMENT_FOLDER)\operations\TypeImages\Uni5dParralelToPlane.bmp">
+            <SCType ID="Helical" Caption="Helical" type="None" 
+                ImageFile="$(SUPPLEMENT_FOLDER)\operations\TypeImages\HelicalMachining.bmp"/>
+            <SCType ID="Planar" Caption="Planar" type="None" 
+                ImageFile="$(SUPPLEMENT_FOLDER)\operations\TypeImages\RoughingStrategy.bmp"/>
+        </SCType>
+
+        <SCType ID="Sort" Caption="Sorting" type="ComplexType" Compact="[PrintingStrategy] = [PrintingStrategy.Planar]"
+                ImageFile="$(SUPPLEMENT_FOLDER)\operations\TypeImages\MachiningOrder.bmp"
+        >
+            <SCType ID="SortBy" Caption="Sorting" type="Enumerated" DefaultValue="ByFeature"
+                Visible="[PrintingStrategy] = [PrintingStrategy.Planar]"
+                ImageFile="$(SUPPLEMENT_FOLDER)\operations\TypeImages\MachiningOrder.bmp">
+                <SCType ID="ByFeature" Caption="ByFeature" type="None" ImageFile="$(SUPPLEMENT_FOLDER)\operations\TypeImages\SortByStrings.bmp"/>
+                <SCType ID="ByLayer" Caption="ByLayer" type="None" ImageFile="$(SUPPLEMENT_FOLDER)\operations\TypeImages\SortByLevels.bmp"/>
+            </SCType>
+            <SCType ID="SplitByLayer" Caption="Split by layers" type="ComplexType" Compact="True"
+                ImageFile="$(SUPPLEMENT_FOLDER)\operations\TypeImages\FaceMillingMachiningLevelsStepCount.bmp"
+                Visible="[SortBy] = [SortBy.ByFeature] and [PrintingStrategy] = [PrintingStrategy.Planar]">
+                
+                <SCType ID="Enabled" Caption="Enabled" type="Boolean" DefaultValue="False" EnabledValue="Count"/>
+				<SCType ID="Count" Caption="Count" type="Integer" DefaultValue="2"
+						Visible="False"
+                        IsInErrorState="[Count] LE 0"/>
+            </SCType>
+            <SCType ID="AllowReverse" Caption="Allow reverse direction" type="Boolean" DefaultValue="True"
+                Visible="[PrintingStrategy] = [PrintingStrategy.Planar]"
+                ImageFile="$(SUPPLEMENT_FOLDER)\operations\TypeImages\AllowReverseDirection.bmp"/>
+            <SCType ID="AllowChangeStartPoint" Caption="Allow change start point" type="Boolean" DefaultValue="True"
+                Visible="[PrintingStrategy] = [PrintingStrategy.Planar]"
+                ImageFile="$(SUPPLEMENT_FOLDER)\operations\TypeImages\StartPoint.bmp"/>
+            <SCType ID="OptimizeOrder" Caption="Optimize order" type="Boolean" DefaultValue="True"
+                Visible="True"
+                ImageFile="$(SUPPLEMENT_FOLDER)\operations\TypeImages\MachiningOrderByList.bmp"/>
+        </SCType>
+
+        <SCType ID="RapidDistance" Type="TRapidDistance" Parent="DistancesPlaceHolder"
+				DefaultValue="1.5*[TechOperation.TechTool.WorkingLength]"
+				ImageFile="$(SUPPLEMENT_FOLDER)\operations\TypeImages\TransitionsRapidDistance.bmp"
+		/>
+
+        <LinksPlaceHolder Reintroduce="True">
+			<SCType ID="ShortLink" Type="TShortLink" Parent="ShortLinkType"  Category="TPropertiesCategoryList.Leads" Priority="100"/>
+			<SCType ID="FirstLinkType" Type="TAdditivePocketerLinkType" DefaultValue="ltSafeLevel" Caption="First link type"
+				ImageFile="$(SUPPLEMENT_FOLDER)\operations\TypeImages\EntryLinkType.bmp"/>
+			<SCType ID="LastLinkType" Type="TAdditivePocketerLinkType" DefaultValue="[FirstLinkType]" Caption="Last link type"
+				ImageFile="$(SUPPLEMENT_FOLDER)\operations\TypeImages\ExitLinkType.bmp"/>
+			<SCType ID="ShortLinkType" Type="TAdditivePocketerLinkType" DefaultValue="ltStraight" Caption="Short link type" 
+				ImageFile="$(SUPPLEMENT_FOLDER)\operations\TypeImages\ShortLinkType.bmp"/>
+			<SCType ID="LongLinkType" Type="TAdditivePocketerLinkType" DefaultValue="ltStraight" Caption="Long link type" 
+				ImageFile="$(SUPPLEMENT_FOLDER)\operations\TypeImages\LongLinkType.bmp"/>
+		</LinksPlaceHolder>
+    </SCType>
+
+</SCCollection>
