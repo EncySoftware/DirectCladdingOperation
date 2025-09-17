@@ -6,7 +6,7 @@ Here are presented both the source codes for studying the methods of programmati
 ## Installation instructions
 1. Download and install the latest version of ENCY (https://encycam.com/download).
 
-2. Select the latest version of the extension from the "Releases" section of this repository, download the **"DirectCladdingOperationExtension.dext"** file from the `Packages` section.
+2. Select the latest version of the extension from the "Releases" section of this repository, download the **"[DirectCladdingOperationExtension.dext](https://github.com/EncySoftware/DirectCladdingOperation/releases)"** file from the `Packages` section.
 
 3. Start ENCY and open the Settings window on the "Extensions" tab.
 
