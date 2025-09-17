@@ -22,6 +22,9 @@ Here are presented both the source codes for studying the methods of programmati
 
 ## Build from source instructions
 
+### Minimum requirements
+1. Minimum compatible version of ENCY: 1.1.3
+
 ### Prerequisites
 1. Install dotnet 8.0 SDK (https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
 
