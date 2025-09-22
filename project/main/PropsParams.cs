@@ -1,4 +1,5 @@
 using CAMAPI.TechOperation;
+using Geometry.VecMatrLib;
 
 namespace DirectCladdingOperationExtension
 {
@@ -35,8 +36,44 @@ namespace DirectCladdingOperationExtension
         public int LastLinkType { get; set; }
     }
 
+    public enum StartPointChangeType
+    {
+        Default = 0,
+        Automatic = 1,
+        Manual = 2
+
+    }
+    public struct StartPointChangeParams
+    {
+        public StartPointChangeType StartPointChangeType { get; set; }
+        public bool ManualChangingEnabled { get; set; }
+        public T3DPoint ManualStartPoint{ get; set; }
+    }
+
     public class PropsParams
     {
+        public StrategyParams StrategyParams { get; set; }
+        public SafeLevelParams SafeLevelParams { get; set; }
+        public LinksParams LinksParams { get; set; }
+        public StartPointChangeParams StartPointChangeParams { get; set; }
+
+        public static void ExtractAllParams(ICamApiTechOperation techOperation,
+            out PropsParams propsParams)
+        {
+            ExtractStrategyParams(techOperation, out StrategyParams strategyParams);
+            ExtractSafeLevelParams(techOperation, out SafeLevelParams safeLevelParams);
+            ExtractLinkParams(techOperation, out LinksParams linksParams);
+            ExtractChangeStartPointParams(techOperation, out StartPointChangeParams startPointChangeParams);
+
+            propsParams = new PropsParams
+            {
+                StrategyParams = strategyParams,
+                SafeLevelParams = safeLevelParams,
+                LinksParams = linksParams,
+                StartPointChangeParams = startPointChangeParams
+            };
+        }
+
         public static void ExtractStrategyParams(ICamApiTechOperation techOperation, out StrategyParams strategyParams)
         {
             var props = techOperation.XMLProp;
@@ -84,6 +121,24 @@ namespace DirectCladdingOperationExtension
                 FeedSwitchRelValue = props.Flt["FeedSwitchLevel.RelValue"],
                 FeedSwitchPercentValue = props.Flt["FeedSwitchLevel.PercentValue"],
                 RapidDistance = props.Flt["RapidDistance"]
+            };
+        }
+
+        public static void ExtractChangeStartPointParams(ICamApiTechOperation techOperation, out StartPointChangeParams startPointChangeParams)
+        {
+            var props = techOperation.XMLProp;
+            var sortProps = props.Ptr["Sort"];
+            startPointChangeParams = new StartPointChangeParams
+            {
+                StartPointChangeType = (StartPointChangeType)sortProps.Int["ChangeStartPoint"],
+                ManualChangingEnabled = sortProps.Bol["StartPoint.Enabled"],
+                ManualStartPoint = !sortProps.Bol["StartPoint.Enabled"]
+                    ? new T3DPoint(
+                        sortProps.Flt["StartPoint.StartP.X"],
+                        sortProps.Flt["StartPoint.StartP.Y"],
+                        sortProps.Flt["StartPoint.StartP.Z"]
+                    )
+                    : T3DPoint.Zero           
             };
         }
     }

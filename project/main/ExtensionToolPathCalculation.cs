@@ -86,11 +86,10 @@ public class ExtensionToolPathCalculation :
             if (curves.Group.Count == 0)
                 return;
 
-            int PrintingStrategy = techOperation.XMLProp.Int["PrintingStrategy"];
-            int sortBy = techOperation.XMLProp.Ptr["Sort"].Int["SortBy"];
+            PropsParams.ExtractAllParams(techOperation, out PropsParams propsParams);
 
             OperationData processedCurves;
-            switch (PrintingStrategy)
+            switch (propsParams.StrategyParams.PrintingStrategy)
             {
                 case 0:
                     var optimizedSingleCurves = HelixOptimizer.GetOptimizedSingleCurves(curves, techOperation);
@@ -105,13 +104,13 @@ public class ExtensionToolPathCalculation :
                     break;
                 case 1:
                 default:
-                    processedCurves = CurveOptimizer.GetOptimizedCurveGroups(curves, techOperation, sortBy);
+                    processedCurves = CurveOptimizer.GetOptimizedCurveGroups(curves, techOperation, propsParams.StrategyParams.SortBy);
                     break;
                 
             }
             
             GeometryHelper.SetNextDistanceForCurves(processedCurves, curves, operation);
-            ExecuteCladding(curves, processedCurves, cldFormer, operation);
+            ExecuteCladding(curves, processedCurves, cldFormer, operation, propsParams);
 
         }
         catch (Exception e)
@@ -162,7 +161,8 @@ public class ExtensionToolPathCalculation :
         OperationGroup curves,
         OperationData curveGroups,
         ICamApiCLDReceiver cldFormer,
-        ICamApiTechOperation techOperation)
+        ICamApiTechOperation techOperation,
+        PropsParams propsParams)
     {
         var props = techOperation.XMLProp;
         try
@@ -170,40 +170,34 @@ public class ExtensionToolPathCalculation :
             var curveConverter = new CurveConverter();
             curveConverter.TargetReceiver = cldFormer;
 
-            StrategyParams strategyParams;
-            PropsParams.ExtractStrategyParams(techOperation, out strategyParams);
-            SafeLevelParams safeLevelParams;
-            PropsParams.ExtractSafeLevelParams(techOperation, out safeLevelParams);
-            LinksParams linksParams;
-            PropsParams.ExtractLinkParams(techOperation, out linksParams);
 
             var boundingBox = GeometryHelper.CalculateBoundingBox(curveGroups, curves);
             var boundingBoxMaxZ = boundingBox.Max.Z;
             var toolDiameter = GeometryHelper.GetToolDiameter(techOperation);
 
-            var strategyName = (strategyParams.PrintingStrategy == 0)
+            var strategyName = (propsParams.StrategyParams.PrintingStrategy == 0)
                     ? $"Helical"
-                    : (strategyParams.SortBy == 0)
+                    : (propsParams.StrategyParams.SortBy == 0)
                         ? $"Features"
                         : $"Layers";
 
             cldFormer.BeginItem(TCLDItemType.aitGroup, "Strategy", strategyName);
 
-            if (strategyParams.PrintingStrategy == 1
-                    && strategyParams.SortBy == 0
-                    && strategyParams.SplitByLayerEnabled
-                    && strategyParams.SplitByLayerCount > 1)
+            if (propsParams.StrategyParams.PrintingStrategy == 1
+                    && propsParams.StrategyParams.SortBy == 0
+                    && propsParams.StrategyParams.SplitByLayerEnabled
+                    && propsParams.StrategyParams.SplitByLayerCount > 1)
             {
                 ProcessFeatureLayerStructure(curves, curveGroups, curveConverter,
                     cldFormer, techOperation,
-                    strategyParams, safeLevelParams, linksParams,
+                    propsParams,
                     boundingBoxMaxZ, toolDiameter);
             }
             else
             {
                 ProcessNormalGroups(curves, curveGroups, curveConverter,
                     cldFormer, techOperation,
-                    strategyParams, safeLevelParams, linksParams,
+                    propsParams,
                     boundingBoxMaxZ, toolDiameter);
             }
             
@@ -222,9 +216,7 @@ public class ExtensionToolPathCalculation :
         CurveConverter curveConverter,
         ICamApiCLDReceiver cldFormer,
         ICamApiTechOperation techOperation,
-        StrategyParams strategyParams,
-        SafeLevelParams safeLevelParams,
-        LinksParams linksParams,
+        PropsParams propsParams,
         double boundingBoxMaxZ,
         double toolDiameter)
     {
@@ -269,7 +261,7 @@ public class ExtensionToolPathCalculation :
                     ProcessGroup(curves, optimizedCurveGroups, curveConverter,
                         item.CurveIdx,
                         cldFormer, techOperation,
-                        strategyParams, safeLevelParams, linksParams,
+                        propsParams,
                         boundingBoxMaxZ, toolDiameter, isBatch: true);
                 }
                 cldFormer.EndItem(); // Feature
@@ -286,17 +278,15 @@ public class ExtensionToolPathCalculation :
         CurveConverter curveConverter,
         ICamApiCLDReceiver cldFormer,
         ICamApiTechOperation techOperation,
-        StrategyParams strategyParams,
-        SafeLevelParams safeLevelParams,
-        LinksParams linksParams,
+        PropsParams propsParams,
         double boundingBoxMaxZ,
         double toolDiameter)
     {
         for (int groupIdx = 0; groupIdx < curveGroups.Groups.Count; groupIdx++)
         {
-            string groupName = strategyParams.PrintingStrategy == 0
+            string groupName = propsParams.StrategyParams.PrintingStrategy == 0
                     ? "Direct Cladding"
-                    : strategyParams.SortBy == 0
+                    : propsParams.StrategyParams.SortBy == 0
                             ? $"Feature {groupIdx + 1}"
                             : $"Layer {groupIdx + 1}";
 
@@ -305,7 +295,7 @@ public class ExtensionToolPathCalculation :
             ProcessGroup(curves, curveGroups, curveConverter,
                     groupIdx,
                     cldFormer, techOperation,
-                    strategyParams, safeLevelParams, linksParams,
+                    propsParams,
                     boundingBoxMaxZ, toolDiameter, isBatch: false);
 
             cldFormer.EndItem();
@@ -319,14 +309,18 @@ public class ExtensionToolPathCalculation :
         int groupIdx,
         ICamApiCLDReceiver cldFormer,
         ICamApiTechOperation techOperation,
-        StrategyParams strategyParams,
-        SafeLevelParams safeLevelParams,
-        LinksParams linksParams,
+        PropsParams propsParams,
         double boundingBoxMaxZ,
         double toolDiameter,
         bool isBatch)
     {
         var currentGroup = curveGroups.Groups[groupIdx];
+
+        var strategyParams = propsParams.StrategyParams;
+        var safeLevelParams = propsParams.SafeLevelParams;
+        var linksParams = propsParams.LinksParams;
+        var startPointChangeParams = propsParams.StartPointChangeParams;
+
         for (int curveIdx = 0; curveIdx < currentGroup.Count; curveIdx++)
         {
             int curveIndex = currentGroup[curveIdx];
@@ -361,9 +355,9 @@ public class ExtensionToolPathCalculation :
             double RapidDistLastLevel = lastCurvePoint.Z + safeLevelParams.RapidDistance;
 
             string itemName = isBatch
-                    ? $"Curve {currentGroup[curveIdx]}" 
+                    ? $"Curve {currentGroup[curveIdx]}"
                     : strategyParams.PrintingStrategy == 0
-                            ? $"Helical {curveIdx + 1}" 
+                            ? $"Helical {curveIdx + 1}"
                             : $"Curve {currentGroup[curveIdx]}";
 
             cldFormer.BeginItem(TCLDItemType.aitGroup, "Direct", itemName);
