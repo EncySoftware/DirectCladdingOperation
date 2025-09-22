@@ -134,6 +134,24 @@
             <SCType ID="AllowReverse" Caption="Allow reverse direction" type="Boolean" DefaultValue="True"
                 Visible="[PrintingStrategy] = [PrintingStrategy.Planar]"
                 ImageFile="$(SUPPLEMENT_FOLDER)\operations\TypeImages\AllowReverseDirection.bmp"/>
+
+            <SCType ID="ChangeStartPoint" Caption="Change start point" type="Enumerated" DefaultValue="Default"
+                Visible="[PrintingStrategy] = [PrintingStrategy.Planar]"
+                ImageFile="$(SUPPLEMENT_FOLDER)\operations\TypeImages\StartPoint.bmp">
+                <SCType ID="Default" Caption="Default" type="None"/>
+                <SCType ID="Automatically" Caption="Automatically" type="None"/>
+                <SCType ID="Manually" Caption="Manually" type="None"/>
+            </SCType>
+
+            <SCType ID="StartPointByUser" Type="TLinkStartPoint" Parent = "ChangeStartPoint" Category="TPropertiesCategoryList.Common"
+                Visible="[ChangeStartPoint] = [ChangeStartPoint.Manually]">
+                <StartP>
+                    <X DefaultValue="[TechOperation.AutoStartPointX]"/>
+                    <Y DefaultValue="[TechOperation.AutoStartPointY]"/>
+                    <Z DefaultValue="[TechOperation.AutoStartPointZ]"/>
+                </StartP>
+            </SCType>
+
             <SCType ID="AllowChangeStartPoint" Caption="Allow change start point" type="Boolean" DefaultValue="True"
                 Visible="[PrintingStrategy] = [PrintingStrategy.Planar]"
                 ImageFile="$(SUPPLEMENT_FOLDER)\operations\TypeImages\StartPoint.bmp"/>
