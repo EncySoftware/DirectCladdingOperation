@@ -135,22 +135,41 @@
                 Visible="[PrintingStrategy] = [PrintingStrategy.Planar]"
                 ImageFile="$(SUPPLEMENT_FOLDER)\operations\TypeImages\AllowReverseDirection.bmp"/>
 
-            <SCType ID="ChangeStartPoint" Caption="Change start point" type="Enumerated" DefaultValue="Default"
-                Visible="[PrintingStrategy] = [PrintingStrategy.Planar]"
-                ImageFile="$(SUPPLEMENT_FOLDER)\operations\TypeImages\StartPoint.bmp">
-                <SCType ID="Default" Caption="Default" type="None"/>
-                <SCType ID="Automatically" Caption="Automatically" type="None"/>
-                <SCType ID="Manually" Caption="Manually" type="None"/>
+            <SCType ID="StartPoint" Caption="Start point" type="ComplexType" Compact="True"
+                    ImageFile="$(SUPPLEMENT_FOLDER)\operations\TypeImages\DirectionPoint.png" 
+            >
+                <SCType ID="Mode" Caption="Change start point" type="Enumerated" DefaultValue="Default"
+                    Visible="[PrintingStrategy] = [PrintingStrategy.Planar]"
+                    ImageFile="$(SUPPLEMENT_FOLDER)\operations\TypeImages\StartPoint.bmp">
+                    <SCType ID="Default" Caption="Do not change" type="None"/>
+                    <SCType ID="Automatically" Caption="Nearest" type="None"/>
+                    <SCType ID="Manually" Caption="Manually" type="None"/>
+                </SCType>
+                <SCType ID="Point" Type="T3DPoint" 
+                    Visible="[Mode] = [Mode.Manually]"
+                    Color="$e8a200"
+                    PresenterVO="TSimplePointVO2" 
+                    Caption="Point" Expanded="False" Transparent="false"
+                    IsVisualController="True"
+                    Text=
+                    "
+                    '(' +
+                    Round([X], 0.01) +
+                    '; ' +
+                    Round([Y], 0.01) +
+                    '; ' +
+                    Round([Z], 0.01) +
+                    ')'
+                    ">
+
+                    <!-- <StartP>
+                        <X DefaultValue="[TechOperation.AutoStartPointX]"/>
+                        <Y DefaultValue="[TechOperation.AutoStartPointY]"/>
+                        <Z DefaultValue="[TechOperation.AutoStartPointZ]"/>
+                    </StartP> -->
+                </SCType>
             </SCType>
 
-            <SCType ID="StartPoint" Type="TLinkStartPoint" Parent = "ChangeStartPoint" Category="TPropertiesCategoryList.Common"
-                Visible="[ChangeStartPoint] = [ChangeStartPoint.Manually]">
-                <StartP>
-                    <X DefaultValue="[TechOperation.AutoStartPointX]"/>
-                    <Y DefaultValue="[TechOperation.AutoStartPointY]"/>
-                    <Z DefaultValue="[TechOperation.AutoStartPointZ]"/>
-                </StartP>
-            </SCType>
 
             <SCType ID="AllowChangeStartPoint" Caption="Allow change start point" type="Boolean" DefaultValue="True"
                 Visible="[PrintingStrategy] = [PrintingStrategy.Planar]"
