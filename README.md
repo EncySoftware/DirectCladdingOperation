@@ -3,6 +3,8 @@ This repository presents an example implementation of an operation for ENCY that
 
 Here are presented both the source codes for studying the methods of programmatically generating a toolpath in the CAM system, and the final binary files, packed into a dext package ready for installation in a CAM system and use.
 
+<img width="1918" height="1038" alt="ency_Ov5l1jIsUg" src="https://github.com/user-attachments/assets/e19861a7-4199-4253-a864-410de37f492d" />
+
 ## Installation instructions
 1. Download and install the latest version of ENCY (https://encycam.com/download).
 
@@ -19,6 +21,9 @@ Here are presented both the source codes for studying the methods of programmati
 7. To use the operation, you need to create a new project, select the "Direct Cladding" operation and define the source set of geometric curves sliced into layers inside any CAD system and specify required parameters like tool diameter, cutting speed, printing strategy, sorting, etc.
 
 ## Build from source instructions
+
+### Minimum requirements
+1. Minimum compatible version of ENCY: 1.1.3
 
 ### Prerequisites
 1. Install dotnet 8.0 SDK (https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
