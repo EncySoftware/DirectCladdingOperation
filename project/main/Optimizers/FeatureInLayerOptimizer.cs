@@ -10,7 +10,8 @@ public struct FeatureInLayerOptimizer
     public static OperationData OptimizeFeatureLayersOrder(
         OperationData curvesGroupedBy,
         OperationGroup allCurves,
-        ICamApiTechOperation techOperation)
+        ICamApiTechOperation techOperation,
+        PropsParams propsParams)
     {
         if (curvesGroupedBy.Groups.Count < 1 || !techOperation.XMLProp.Ptr["Sort"].Bol["OptimizeOrder"])
             return curvesGroupedBy;
@@ -54,7 +55,7 @@ public struct FeatureInLayerOptimizer
                     groupCurves.Add(allCurves.GetOrderedItem(curveIndex));
                 }
 
-                int[] optimizedOrder = CurveOptimizer.OptimizeCurveOrder(groupCurves, techOperation);
+                int[] optimizedOrder = CurveOptimizer.OptimizeCurveOrder(groupCurves, techOperation, propsParams);
                 firstLayerTemplate = optimizedOrder;
 
                 optimizedGroupIndices = optimizedOrder.Select(orderIndex => groupIndices[orderIndex]).ToList();

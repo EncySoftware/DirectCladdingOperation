@@ -86,6 +86,7 @@ public class ExtensionToolPathCalculation :
             if (curves.Group.Count == 0)
                 return;
 
+            //Extracting all XML props: operation params like strategy, link and etc.
             PropsParams.ExtractAllParams(techOperation, out PropsParams propsParams);
 
             OperationData processedCurves;
@@ -104,7 +105,7 @@ public class ExtensionToolPathCalculation :
                     break;
                 case 1:
                 default:
-                    processedCurves = CurveOptimizer.GetOptimizedCurveGroups(curves, techOperation, propsParams.StrategyParams.SortBy);
+                    processedCurves = CurveOptimizer.GetOptimizedCurveGroups(curves, techOperation, propsParams);
                     break;
                 
             }
@@ -164,49 +165,40 @@ public class ExtensionToolPathCalculation :
         ICamApiTechOperation techOperation,
         PropsParams propsParams)
     {
-        var props = techOperation.XMLProp;
-        try
+        var curveConverter = new CurveConverter();
+        curveConverter.TargetReceiver = cldFormer;
+
+        var boundingBox = GeometryHelper.CalculateBoundingBox(curveGroups, curves);
+        var boundingBoxMaxZ = boundingBox.Max.Z;
+        var toolDiameter = GeometryHelper.GetToolDiameter(techOperation);
+
+        var strategyName = (propsParams.StrategyParams.PrintingStrategy == 0)
+                ? $"Helical"
+                : (propsParams.StrategyParams.SortBy == 0)
+                    ? $"Features"
+                    : $"Layers";
+
+        cldFormer.BeginItem(TCLDItemType.aitGroup, "Strategy", strategyName);
+
+        if (propsParams.StrategyParams.PrintingStrategy == 1
+                && propsParams.StrategyParams.SortBy == 0
+                && propsParams.StrategyParams.SplitByLayerEnabled
+                && propsParams.StrategyParams.SplitByLayerCount > 1)
         {
-            var curveConverter = new CurveConverter();
-            curveConverter.TargetReceiver = cldFormer;
-
-
-            var boundingBox = GeometryHelper.CalculateBoundingBox(curveGroups, curves);
-            var boundingBoxMaxZ = boundingBox.Max.Z;
-            var toolDiameter = GeometryHelper.GetToolDiameter(techOperation);
-
-            var strategyName = (propsParams.StrategyParams.PrintingStrategy == 0)
-                    ? $"Helical"
-                    : (propsParams.StrategyParams.SortBy == 0)
-                        ? $"Features"
-                        : $"Layers";
-
-            cldFormer.BeginItem(TCLDItemType.aitGroup, "Strategy", strategyName);
-
-            if (propsParams.StrategyParams.PrintingStrategy == 1
-                    && propsParams.StrategyParams.SortBy == 0
-                    && propsParams.StrategyParams.SplitByLayerEnabled
-                    && propsParams.StrategyParams.SplitByLayerCount > 1)
-            {
-                ProcessFeatureLayerStructure(curves, curveGroups, curveConverter,
-                    cldFormer, techOperation,
-                    propsParams,
-                    boundingBoxMaxZ, toolDiameter);
-            }
-            else
-            {
-                ProcessNormalGroups(curves, curveGroups, curveConverter,
-                    cldFormer, techOperation,
-                    propsParams,
-                    boundingBoxMaxZ, toolDiameter);
-            }
-            
-            cldFormer.EndItem();
+            ProcessFeatureLayerStructure(curves, curveGroups, curveConverter,
+                cldFormer, techOperation,
+                propsParams,
+                boundingBoxMaxZ, toolDiameter);
         }
-        finally
+        else
         {
-            Marshal.ReleaseComObject(props);
+            ProcessNormalGroups(curves, curveGroups, curveConverter,
+                cldFormer, techOperation,
+                propsParams,
+                boundingBoxMaxZ, toolDiameter);
         }
+        
+        cldFormer.EndItem();
     }
 
     
@@ -220,7 +212,7 @@ public class ExtensionToolPathCalculation :
         double boundingBoxMaxZ,
         double toolDiameter)
     {
-        OperationData optimizedCurveGroups = FeatureInLayerOptimizer.OptimizeFeatureLayersOrder(curveGroups, curves, techOperation);
+        OperationData optimizedCurveGroups = FeatureInLayerOptimizer.OptimizeFeatureLayersOrder(curveGroups, curves, techOperation, propsParams);
 
         LayerGroupsDictionary layersDict = [];
         
@@ -231,7 +223,7 @@ public class ExtensionToolPathCalculation :
             layersDict.AddGroup(groupInfo);
         }
 
-        CurveOptimizer.UpdateStartPoints(optimizedCurveGroups, curves, techOperation);
+        CurveOptimizer.UpdateStartPoints(optimizedCurveGroups, curves, techOperation, propsParams);
         foreach (var layerKey in layersDict)
         {
             cldFormer.BeginItem(TCLDItemType.aitGroup, "Layer", $"Layer {layerKey.Key + 1}");
@@ -335,7 +327,7 @@ public class ExtensionToolPathCalculation :
             double nearestParameter = 0.0;
 
             if (strategyParams.PrintingStrategy == 1
-                    && strategyParams.AllowChangeStartPoint
+                    && (startPointChangeParams.StartPointChangeType != StartPointChangeType.Default)
                     && currentCurve.IsClosed)
             {
                 firstCurvePoint = currentOpCurve.StartPoint;
@@ -355,12 +347,12 @@ public class ExtensionToolPathCalculation :
             double RapidDistLastLevel = lastCurvePoint.Z + safeLevelParams.RapidDistance;
 
             string itemName = isBatch
-                    ? $"Curve {currentGroup[curveIdx]}"
+                    ? $"Item {currentGroup[curveIdx]}"
                     : strategyParams.PrintingStrategy == 0
                             ? $"Helical {curveIdx + 1}"
                             : $"Curve {currentGroup[curveIdx]}";
 
-            cldFormer.BeginItem(TCLDItemType.aitGroup, "Direct", itemName);
+            cldFormer.BeginItem(TCLDItemType.aitGroup, "Curve", itemName);
 
             ElementType elType = MovementTypeHelper.DetermineElementType(
                             groupIdx, curveIdx,
@@ -455,7 +447,8 @@ public class ExtensionToolPathCalculation :
                     break;
             }
 
-            if (strategyParams.AllowChangeStartPoint && currentCurve.IsClosed)
+            if ((startPointChangeParams.StartPointChangeType != StartPointChangeType.Default)
+                    && currentCurve.IsClosed)
             {
                 currentCurve.SavePartToReceiver(curveConverter, nearestParameter, currentCurve.TMax, 0);
                 currentCurve.SavePartToReceiver(curveConverter, currentCurve.TMin, nearestParameter, 0);

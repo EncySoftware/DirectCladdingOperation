@@ -136,10 +136,10 @@
                 ImageFile="$(SUPPLEMENT_FOLDER)\operations\TypeImages\AllowReverseDirection.bmp"/>
 
             <SCType ID="StartPoint" Caption="Start point" type="ComplexType" Compact="True"
-                    ImageFile="$(SUPPLEMENT_FOLDER)\operations\TypeImages\DirectionPoint.png" 
+                    Visible="[PrintingStrategy] = [PrintingStrategy.Planar]"
+                    ImageFile="$(SUPPLEMENT_FOLDER)\operations\TypeImages\StartPoint.bmp" 
             >
                 <SCType ID="Mode" Caption="Change start point" type="Enumerated" DefaultValue="Default"
-                    Visible="[PrintingStrategy] = [PrintingStrategy.Planar]"
                     ImageFile="$(SUPPLEMENT_FOLDER)\operations\TypeImages\StartPoint.bmp">
                     <SCType ID="Default" Caption="Do not change" type="None"/>
                     <SCType ID="Automatically" Caption="Nearest" type="None"/>
@@ -171,9 +171,9 @@
             </SCType>
 
 
-            <SCType ID="AllowChangeStartPoint" Caption="Allow change start point" type="Boolean" DefaultValue="True"
+            <!-- <SCType ID="AllowChangeStartPoint" Caption="Allow change start point" type="Boolean" DefaultValue="True"
                 Visible="[PrintingStrategy] = [PrintingStrategy.Planar]"
-                ImageFile="$(SUPPLEMENT_FOLDER)\operations\TypeImages\StartPoint.bmp"/>
+                ImageFile="$(SUPPLEMENT_FOLDER)\operations\TypeImages\StartPoint.bmp"/> -->
             <SCType ID="OptimizeOrder" Caption="Optimize order" type="Boolean" DefaultValue="True"
                 Visible="True"
                 ImageFile="$(SUPPLEMENT_FOLDER)\operations\TypeImages\MachiningOrderByList.bmp"/>

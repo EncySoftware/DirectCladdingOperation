@@ -25,12 +25,19 @@ public struct GroupOptimizer
         }
     }
 
-    public static OperationData OptimizeGroupsOrder(OperationData groups, OperationGroup sourceGroup, ICamApiTechOperation techOperation)
+    public static OperationData OptimizeGroupsOrder(
+        OperationData groups, OperationGroup sourceGroup,
+        ICamApiTechOperation techOperation, PropsParams propsParams)
     {
         if (groups.Groups.Count < 1 || !techOperation.XMLProp.Ptr["Sort"].Bol["OptimizeOrder"])
             return groups;
-
-        T3DPoint machinePoint = GeometryHelper.GetMachineStartPoint(techOperation);
+            
+        var startPointChangeParams = propsParams.StartPointChangeParams;
+        T3DPoint machinePoint;
+        if (startPointChangeParams.StartPointChangeType == StartPointChangeType.Automatic)
+            machinePoint = GeometryHelper.GetMachineStartPoint(techOperation);
+        else
+            machinePoint = startPointChangeParams.ManualStartPoint;
 
         OperationData result = new OperationData();
         var remainingGroups = new List<List<int>>(groups.Groups);

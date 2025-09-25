@@ -8,12 +8,13 @@ public struct LayerOptimizer
 {
     private static int[]? firstLayerTemplate = null;
 
-    public static OperationData OptimizeLayersOrder(OperationData curvesGroupedBy, OperationGroup allCurves, ICamApiTechOperation techOperation)
+    public static OperationData OptimizeLayersOrder(
+        OperationData curvesGroupedBy, OperationGroup allCurves,
+        ICamApiTechOperation techOperation, PropsParams propsParams)
     {
         if (curvesGroupedBy.Groups.Count < 1 || !techOperation.XMLProp.Ptr["Sort"].Bol["OptimizeOrder"])
             return curvesGroupedBy;
 
-        T3DPoint machinePoint = GeometryHelper.GetMachineStartPoint(techOperation);
         OperationData optimizedData = new OperationData();
 
         for (int layerIndex = 0; layerIndex < curvesGroupedBy.Groups.Count; layerIndex++)
@@ -36,7 +37,7 @@ public struct LayerOptimizer
                     groupCurves.Add(allCurves.GetOrderedItem(index));
                 }
 
-                int[] optimizedOrder = CurveOptimizer.OptimizeCurveOrder(groupCurves, techOperation);
+                int[] optimizedOrder = CurveOptimizer.OptimizeCurveOrder(groupCurves, techOperation, propsParams);
 
                 firstLayerTemplate = optimizedOrder;
 

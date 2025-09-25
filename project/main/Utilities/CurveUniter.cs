@@ -37,6 +37,61 @@ public struct CurveUniter
         return groups;
     }
 
+    public static OperationData GroupCurvesByBoundingBox(OperationGroup operationGroup, double tolerance = 0.1)
+    {
+        var groups = new OperationData();
+
+        var regions = new List<(List<int> Indices, T3DBox BBox)>();
+        
+        for (int curveIdx = 0; curveIdx < operationGroup.Group.Count; curveIdx++)
+        {
+            var operationCurve = operationGroup.Group[curveIdx];
+            var currentBBox = operationCurve.Curve.Box;
+            bool addedToExistingGroup = false;
+
+            for (int regionIdx = 0; regionIdx < regions.Count; regionIdx++)
+            {
+                var region = regions[regionIdx];
+                
+                if (DoBoxesOverlap(region.BBox, currentBBox, tolerance))
+                {
+                    region.Indices.Add(curveIdx);
+                    
+                    region.BBox += currentBBox;
+                    
+                    regions[regionIdx] = region;
+                    addedToExistingGroup = true;
+                    break;
+                }
+            }
+
+            if (!addedToExistingGroup)
+            {
+                
+                regions.Add((new List<int> { curveIdx }, currentBBox));
+            }
+        }
+
+        foreach (var region in regions)
+        {
+            groups.Groups.Add(region.Indices);
+        }
+
+        return groups;
+    }
+
+
+    private static bool DoBoxesOverlap(T3DBox box1, T3DBox box2, double tolerance)
+    {
+        double overlapX = Math.Min(box1.Max.X, box2.Max.X) - 
+                        Math.Max(box1.Min.X, box2.Min.X);
+        
+        double overlapY = Math.Min(box1.Max.Y, box2.Max.Y) - 
+                        Math.Max(box1.Min.Y, box2.Min.Y);
+
+        return overlapX > tolerance && overlapY > tolerance;
+    }
+
     public static OperationData GroupCurvesByZLayer(OperationGroup operationGroup, double zTolerance = 0.3)
     {
         var groups = new OperationData();
@@ -48,7 +103,7 @@ public struct CurveUniter
             var center = GetCurveCenter(operationCurve);
             double z = center.Z;
 
-            
+
             bool addedToExistingLayer = false;
             foreach (var layerZ in zLayers.Keys)
             {
@@ -67,7 +122,7 @@ public struct CurveUniter
         }
 
         var sortedLayers = zLayers.OrderBy(kv => kv.Key);
-    
+
         foreach (var layer in sortedLayers)
         {
             groups.Groups.Add(layer.Value);

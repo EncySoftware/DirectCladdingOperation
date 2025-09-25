@@ -13,41 +13,43 @@ public struct CurveOptimizer
     }
 
     public static OperationData GetOptimizedCurveGroups(OperationGroup curves,
-        ICamApiTechOperation techOperation, int sortBy)
+        ICamApiTechOperation techOperation, PropsParams propsParams)
     {
+        int sortBy = propsParams.StrategyParams.SortBy;
         curves.InitOrder();
 
         OperationData curvesGroupedBy = sortBy == SortBy.Layer
-            ? OptimizeByLayer(curves, techOperation)
-            : OptimizeByFeature(curves, techOperation);
+            ? OptimizeByLayer(curves, techOperation, propsParams)
+            : OptimizeByFeature(curves, techOperation, propsParams);
 
-        UpdateStartPoints(curvesGroupedBy, curves, techOperation);
+        UpdateStartPoints(curvesGroupedBy, curves, techOperation, propsParams);
 
         return curvesGroupedBy;
     }
 
     private static OperationData OptimizeByLayer(
         OperationGroup curves,
-        ICamApiTechOperation techOperation)
+        ICamApiTechOperation techOperation, PropsParams propsParams)
     {
         OperationData curvesGroupedBy = CurveUniter.GroupCurvesByZLayer(curves);
-        curvesGroupedBy = LayerOptimizer.OptimizeLayersOrder(curvesGroupedBy, curves, techOperation);
+        curvesGroupedBy = LayerOptimizer.OptimizeLayersOrder(curvesGroupedBy, curves, techOperation, propsParams);
 
         return curvesGroupedBy;
     }
 
     private static OperationData OptimizeByFeature(
         OperationGroup curves,
-        ICamApiTechOperation techOperation)
+        ICamApiTechOperation techOperation,
+        PropsParams propsParams)
     {
-        OperationData curvesGroupedBy = CurveUniter.GroupCurvesByCenter(curves);
+        //OperationData curvesGroupedBy = CurveUniter.GroupCurvesByCenter(curves);
+        OperationData curvesGroupedBy = CurveUniter.GroupCurvesByBoundingBox(curves);
 
-        var splitByLayer = techOperation.XMLProp.Ptr["Sort"].Ptr["SplitByLayer"];
-        bool isSplitByLayerEnabled = splitByLayer.Bol["Enabled"];
+        bool isSplitByLayerEnabled = propsParams.StrategyParams.SplitByLayerEnabled;
 
         if (isSplitByLayerEnabled)
         {
-            int batchSize = splitByLayer.Int["Count"];
+            int batchSize = propsParams.StrategyParams.SplitByLayerCount;
             if (batchSize > 1)
             {
                 return ProcessFeaturesInLayers(curvesGroupedBy, batchSize);
@@ -55,7 +57,7 @@ public struct CurveOptimizer
         }
 
         GroupOptimizer.SortGroupsByOrderIndex(curvesGroupedBy, curves);
-        curvesGroupedBy = GroupOptimizer.OptimizeGroupsOrder(curvesGroupedBy, curves, techOperation);
+        curvesGroupedBy = GroupOptimizer.OptimizeGroupsOrder(curvesGroupedBy, curves, techOperation, propsParams);
 
         return curvesGroupedBy;
     }
@@ -63,12 +65,19 @@ public struct CurveOptimizer
     public static void UpdateStartPoints(
         OperationData operationData,
         OperationGroup sourceGroup,
-        ICamApiTechOperation techOperation)
+        ICamApiTechOperation techOperation,
+        PropsParams propsParams)
     {
-        if (!techOperation.XMLProp.Ptr["Sort"].Bol["AllowChangeStartPoint"])
-            return;
+        var startPointChangeParams = propsParams.StartPointChangeParams;
 
-        T3DPoint machinePoint = GeometryHelper.GetMachineStartPoint(techOperation);
+        T3DPoint machinePoint;
+        if (startPointChangeParams.StartPointChangeType == StartPointChangeType.Default)
+            return;
+        else if (startPointChangeParams.StartPointChangeType == StartPointChangeType.Automatic)
+            machinePoint = GeometryHelper.GetMachineStartPoint(techOperation);
+        else
+            machinePoint = startPointChangeParams.ManualStartPoint;
+
         T3DPoint referencePoint = machinePoint;
 
         for (int groupIdx = 0; groupIdx < operationData.Groups.Count; groupIdx++)
@@ -86,6 +95,8 @@ public struct CurveOptimizer
                             referencePoint, currentCurve.TMin, currentCurve.TMax);
                 T3DPoint currentNearestPoint = currentCurve.Get_Point(nearestParameter);
 
+                var res1 = currentCurve.KnotPoint[0];
+                var res2 = currentCurve.KnotPoint[currentCurve.QntP];
                 operationCurve.NearestParameter = nearestParameter;
                 operationCurve.NearestPoint = currentNearestPoint;
                 operationCurve.StartPoint = currentNearestPoint;
@@ -96,7 +107,7 @@ public struct CurveOptimizer
         }
     }
 
-    public static int[] OptimizeCurveOrder(List<OperationCurve> curves, ICamApiTechOperation techOperation)
+    public static int[] OptimizeCurveOrder(List<OperationCurve> curves, ICamApiTechOperation techOperation, PropsParams propsParams)
     {
         int count = curves.Count;
         if (count <= 1)
@@ -107,7 +118,12 @@ public struct CurveOptimizer
         int[] newOrder = new int[count];
         bool[] visited = new bool[count];
 
-        T3DPoint machinePoint = GeometryHelper.GetMachineStartPoint(techOperation);
+        var startPointChangeParams = propsParams.StartPointChangeParams;
+        T3DPoint machinePoint;
+        if (startPointChangeParams.StartPointChangeType == StartPointChangeType.Automatic)
+            machinePoint = GeometryHelper.GetMachineStartPoint(techOperation);
+        else
+            machinePoint = startPointChangeParams.ManualStartPoint;
         int startIndex = FindNearestToPoint(curves, machinePoint);
         newOrder[0] = startIndex;
         visited[startIndex] = true;

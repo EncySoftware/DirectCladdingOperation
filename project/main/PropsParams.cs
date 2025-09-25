@@ -1,5 +1,8 @@
 using CAMAPI.TechOperation;
 using Geometry.VecMatrLib;
+using static Geometry.VecMatrLib.VML;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace DirectCladdingOperationExtension
 {
@@ -8,7 +11,7 @@ namespace DirectCladdingOperationExtension
         public int PrintingStrategy { get; set; }
         public bool AllowReverse { get; set; }
         public int SortBy { get; set; }
-        public bool AllowChangeStartPoint { get; set; }
+        //public bool AllowChangeStartPoint { get; set; }
         public bool SplitByLayerEnabled { get; set; }
         public int SplitByLayerCount { get; set; }
     }
@@ -46,7 +49,6 @@ namespace DirectCladdingOperationExtension
     public struct StartPointChangeParams
     {
         public StartPointChangeType StartPointChangeType { get; set; }
-        public bool ManualChangingEnabled { get; set; }
         public T3DPoint ManualStartPoint{ get; set; }
     }
 
@@ -79,67 +81,92 @@ namespace DirectCladdingOperationExtension
             var props = techOperation.XMLProp;
             var sortingProps = props.Ptr["Sort"];
             var SplitByLayer = sortingProps.Ptr["SplitByLayer"];
-
-            strategyParams = new StrategyParams
+            try
             {
-                PrintingStrategy = props.Int["PrintingStrategy"],
-                AllowReverse = sortingProps.Bol["AllowReverse"],
-                SortBy = sortingProps.Int["SortBy"],
-                AllowChangeStartPoint = sortingProps.Bol["AllowChangeStartPoint"],
-                SplitByLayerEnabled = SplitByLayer.Bol["Enabled"],
-                SplitByLayerCount = SplitByLayer.Int["Count"]
-            };
+                strategyParams = new StrategyParams
+                {
+                    PrintingStrategy = props.Int["PrintingStrategy"],
+                    AllowReverse = sortingProps.Bol["AllowReverse"],
+                    SortBy = sortingProps.Int["SortBy"],
+                    // AllowChangeStartPoint = sortingProps.Bol["AllowChangeStartPoint"],
+                    SplitByLayerEnabled = SplitByLayer.Bol["Enabled"],
+                    SplitByLayerCount = SplitByLayer.Int["Count"]
+                };
+            }
+            finally
+            {
+                Marshal.ReleaseComObject(props);
+            }
         }
 
         public static void ExtractLinkParams(ICamApiTechOperation techOperation, out LinksParams linksParams)
         {
             var props = techOperation.XMLProp;
             var LinksPlaceHolder = props.Ptr["LinksPlaceHolder"];
-
-            linksParams = new LinksParams
+            try
             {
-                LinksPlaceHolderType = LinksPlaceHolder.Int["ShortLink.ValueType"],
-                LinksPlaceHolderDistValue = LinksPlaceHolder.Flt["ShortLink.DistanceValue"],
-                LinksPlaceHolderPercValue = LinksPlaceHolder.Flt["ShortLink.PercentValue"],
-                ShortLinkType = props.Int["LinksPlaceHolder.ShortLinkType"],
-                LongLinkType = props.Int["LinksPlaceHolder.LongLinkType"],
-                FirstLinkType = props.Int["LinksPlaceHolder.FirstLinkType"],
-                LastLinkType = props.Int["LinksPlaceHolder.LastLinkType"]
-            };
+                linksParams = new LinksParams
+                {
+                    LinksPlaceHolderType = LinksPlaceHolder.Int["ShortLink.ValueType"],
+                    LinksPlaceHolderDistValue = LinksPlaceHolder.Flt["ShortLink.DistanceValue"],
+                    LinksPlaceHolderPercValue = LinksPlaceHolder.Flt["ShortLink.PercentValue"],
+                    ShortLinkType = props.Int["LinksPlaceHolder.ShortLinkType"],
+                    LongLinkType = props.Int["LinksPlaceHolder.LongLinkType"],
+                    FirstLinkType = props.Int["LinksPlaceHolder.FirstLinkType"],
+                    LastLinkType = props.Int["LinksPlaceHolder.LastLinkType"]
+                };
+            }
+            finally
+            {
+                Marshal.ReleaseComObject(props);
+            }
         }
 
         public static void ExtractSafeLevelParams(ICamApiTechOperation techOperation, out SafeLevelParams safeLevelParams)
         {
             var props = techOperation.XMLProp;
-            safeLevelParams = new SafeLevelParams
+            try
             {
-                SafeLevelRefType = props.Int["SafeLevel.ReferenceType"],
-                SafeLevelAbsValue = props.Flt["SafeLevel.AbsValue"],
-                SafeLevelRelValue = props.Flt["SafeLevel.RelValue"],
-                FeedSwitchRefType = props.Int["FeedSwitchLevel.ReferenceType"],
-                FeedSwitchAbsValue = props.Flt["FeedSwitchLevel.AbsValue"],
-                FeedSwitchRelValue = props.Flt["FeedSwitchLevel.RelValue"],
-                FeedSwitchPercentValue = props.Flt["FeedSwitchLevel.PercentValue"],
-                RapidDistance = props.Flt["RapidDistance"]
-            };
+                safeLevelParams = new SafeLevelParams
+                {
+                    SafeLevelRefType = props.Int["SafeLevel.ReferenceType"],
+                    SafeLevelAbsValue = props.Flt["SafeLevel.AbsValue"],
+                    SafeLevelRelValue = props.Flt["SafeLevel.RelValue"],
+                    FeedSwitchRefType = props.Int["FeedSwitchLevel.ReferenceType"],
+                    FeedSwitchAbsValue = props.Flt["FeedSwitchLevel.AbsValue"],
+                    FeedSwitchRelValue = props.Flt["FeedSwitchLevel.RelValue"],
+                    FeedSwitchPercentValue = props.Flt["FeedSwitchLevel.PercentValue"],
+                    RapidDistance = props.Flt["RapidDistance"]
+                };
+            }
+            finally
+            {
+                Marshal.ReleaseComObject(props);
+            }
         }
 
         public static void ExtractChangeStartPointParams(ICamApiTechOperation techOperation, out StartPointChangeParams startPointChangeParams)
         {
             var props = techOperation.XMLProp;
             var sortProps = props.Ptr["Sort"];
-            startPointChangeParams = new StartPointChangeParams
+            try
             {
-                StartPointChangeType = (StartPointChangeType)sortProps.Int["ChangeStartPoint"],
-                ManualChangingEnabled = sortProps.Bol["StartPoint.Enabled"],
-                ManualStartPoint = !sortProps.Bol["StartPoint.Enabled"]
-                    ? new T3DPoint(
-                        sortProps.Flt["StartPoint.StartP.X"],
-                        sortProps.Flt["StartPoint.StartP.Y"],
-                        sortProps.Flt["StartPoint.StartP.Z"]
-                    )
-                    : T3DPoint.Zero           
-            };
+                var lcs = (T3DMatrix)(techOperation.LCS);
+                startPointChangeParams = new StartPointChangeParams
+                {
+                    StartPointChangeType = (StartPointChangeType)sortProps.Int["StartPoint.Mode"],
+                    ManualStartPoint = 
+                        lcs.GetLocalPoint(
+                            p3d(sortProps.Flt["StartPoint.Point.X"],
+                            sortProps.Flt["StartPoint.Point.Y"],
+                            sortProps.Flt["StartPoint.Point.Z"])
+                        )                    
+                };
+            }
+            finally
+            {
+                Marshal.ReleaseComObject(props);
+            }
         }
     }
 }
