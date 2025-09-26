@@ -14,9 +14,8 @@
         <!-- Header -->
         <Name DefaultValue="Direct cladding"/>
         <Comment DefaultValue="Direct cladding"/>
-        <Image DefaultValue="$(SUPPLEMENT_FOLDER)\operations\MillOperations\Images\CurveCladding.bmp"/>
-        <Icon DefaultValue="$(SUPPLEMENT_FOLDER)\operations\MillOperations\Images\CurveCladding_Ico.bmp"/>
-        <Video DefaultValue="$(SUPPLEMENT_FOLDER)\operations\MillOperations\Video\Knife5D.wmv"/>
+        <Image DefaultValue="$(SUPPLEMENT_FOLDER)\operations\MillOperations\Images\CurveCladding.png"/>
+        <Icon DefaultValue="$(SUPPLEMENT_FOLDER)\operations\MillOperations\Images\CurveCladding_Ico.png"/>
         <OperationGroup DefaultValue="Mill"/>
         <MultiGroup>
             <SCType ID="Additive" OrderInGroup="10" type="TLinkToParentMultiGroup"/>
