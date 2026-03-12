@@ -4,14 +4,30 @@
     <NoWarn>NETSDK1138;1591</NoWarn>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
-    <Version>2.0.0</Version>
+    <Authors>ENCY</Authors>
+    <PackageId>EncySoftware.DirectCladdingOperation</PackageId>
+    <PackageTags>ency-extension;operationsolver</PackageTags>
+    <Description>Operation for ENCY that calculates a toolpath for additive machining by directly transforming input geometric curves into tool movements at given speeds and with specified linking strategy parameters</Description>
+    <PackageIcon>icon.png</PackageIcon>
+    <PackageProjectUrl>https://github.com/EncySoftware/DirectCladdingOperation</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/EncySoftware/DirectCladdingOperation</RepositoryUrl>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <OutDir>bin\$(Configuration)</OutDir>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
-
+  
   <ItemGroup>
     <PackageReference Include="EncySoftware.CAMAPI.SDK.Net" Version="2.0.16" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="icon.png" Pack="true" PackagePath="\"/>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+    <None Include="DirectCladdingOperation_ExtOp.xml" Pack="true" PackagePath="contentFiles\any\any\">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="DirectCladdingOperationExtension.settings.json" Pack="true" PackagePath="contentFiles\any\any\">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>
