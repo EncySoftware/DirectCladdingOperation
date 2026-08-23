@@ -36,10 +36,11 @@ public class ExtensionToolPathCalculation :
         try
         {
             using var operationCom = new ComWrapper<ICamApiTechOperation>(context.TechOperation);
-            var operation = operationCom.Instance
-                ?? throw new Exception("TechOperation container is not initialized");
             _operationEventHandler ??= new OperationEventHandler();
-            operation.RegisterHandler("OperationSolverExtension", _operationEventHandler, new ListString(), out resultStatus);
+            TResultStatus status = default;
+            operationCom.Invoke(operation =>
+                operation.RegisterHandler("OperationSolverExtension", _operationEventHandler, new ListString(), out status));
+            resultStatus = status;
         }
         catch (Exception e)
         {
@@ -74,45 +75,42 @@ public class ExtensionToolPathCalculation :
             if (techOperation == null || cldReceiver == null)
                 return;
             using var cldFormerCom = new ComWrapper<ICamApiCLDReceiver>(cldReceiver);
-            var cldFormer = cldFormerCom.Instance
-                ?? throw new Exception("CLDReceiver container is not initialized");
             using var operationCom = new ComWrapper<ICamApiTechOperation>(techOperation);
-            var operation = operationCom.Instance;
-            if (operation == null)
-                return;
-
-            // Get all curves, we have to directCladding
-            var curves = GetCurves(operation);
-            if (curves.Group.Count == 0)
-                return;
-
-            //Extracting all XML props: operation params like strategy, link and etc.
-            PropsParams.ExtractAllParams(techOperation, out PropsParams propsParams);
-
-            OperationData processedCurves;
-            switch (propsParams.StrategyParams.PrintingStrategy)
+            operationCom.Invoke(operation =>
             {
-                case 0:
-                    var optimizedSingleCurves = HelixOptimizer.GetOptimizedSingleCurves(curves, techOperation);
+                // Get all curves, we have to directCladding
+                var curves = GetCurves(operation);
+                if (curves.Group.Count == 0)
+                    return;
 
-                    processedCurves = new OperationData
-                    {
-                        Groups =
-                        [
-                            optimizedSingleCurves.OrderIndex.ToList()
-                        ]
-                    };
-                    break;
-                case 1:
-                default:
-                    processedCurves = CurveOptimizer.GetOptimizedCurveGroups(curves, techOperation, propsParams);
-                    break;
-                
-            }
-            
-            GeometryHelper.SetNextDistanceForCurves(processedCurves, curves, operation);
-            ExecuteCladding(curves, processedCurves, cldFormer, operation, propsParams);
+                //Extracting all XML props: operation params like strategy, link and etc.
+                PropsParams.ExtractAllParams(techOperation, out PropsParams propsParams);
 
+                OperationData processedCurves;
+                switch (propsParams.StrategyParams.PrintingStrategy)
+                {
+                    case 0:
+                        var optimizedSingleCurves = HelixOptimizer.GetOptimizedSingleCurves(curves, techOperation);
+
+                        processedCurves = new OperationData
+                        {
+                            Groups =
+                            [
+                                optimizedSingleCurves.OrderIndex.ToList()
+                            ]
+                        };
+                        break;
+                    case 1:
+                    default:
+                        processedCurves = CurveOptimizer.GetOptimizedCurveGroups(curves, techOperation, propsParams);
+                        break;
+
+                }
+
+                GeometryHelper.SetNextDistanceForCurves(processedCurves, curves, operation);
+                cldFormerCom.Invoke(cldFormer =>
+                    ExecuteCladding(curves, processedCurves, cldFormer, operation, propsParams));
+            });
         }
         catch (Exception e)
         {

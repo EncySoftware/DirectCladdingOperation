@@ -14,11 +14,12 @@ public class OperationEventHandler : ICamApiEventHandler,
         public void MakeSupportedItems(ICamApiModelFormerSupportedItems itemsObj)
         {
             using var itemsCom = new ComWrapper<ICamApiModelFormerSupportedItems>(itemsObj);
-            var items = itemsCom.Instance
-                ?? throw new Exception("Failed to get supported items");
-            items.AddItem("Curve", 
-                InterfaceInfo.IID<ICamApiCurvesArrayModelItem>(),
-                "", "Curve", "", "", false, null);
+            itemsCom.Invoke(items =>
+            {
+                items.AddItem("Curve",
+                    InterfaceInfo.IID<ICamApiCurvesArrayModelItem>(),
+                    "", "Curve", "", "", false, null);
+            });
         }
     }
     
@@ -36,13 +37,15 @@ public class OperationEventHandler : ICamApiEventHandler,
     public void InitModelFormers(ICamApiModelFormer modelFormersObj)
     {
         using var modelFormersCom = new ComWrapper<ICamApiModelFormer>(modelFormersObj);
-        var modelFormers = modelFormersCom.Instance
-            ?? throw new Exception("Failed to get model formers");
-        
-        if (modelFormers.SupportedItems != null)
+        using var supportedItemsCom = modelFormersCom.InvokeAndWrap(modelFormers => modelFormers.SupportedItems);
+        if (!supportedItemsCom.IsNull)
             return;
-        modelFormers.MakeSupportedItems(new ModelFormerMakeSupportedItems(), out var resultStatus);
-        if (resultStatus.Code == TResultStatusCode.rsError)
-            throw new Exception(resultStatus.Description);
+
+        modelFormersCom.Invoke(modelFormers =>
+        {
+            modelFormers.MakeSupportedItems(new ModelFormerMakeSupportedItems(), out var resultStatus);
+            if (resultStatus.Code == TResultStatusCode.rsError)
+                throw new Exception(resultStatus.Description);
+        });
     }
 }
