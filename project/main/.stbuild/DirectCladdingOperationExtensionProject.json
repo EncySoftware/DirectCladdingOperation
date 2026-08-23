@@ -12,7 +12,7 @@
 		{
 			"class": "Dotnet",
 			"id": "$env:package_namespace$.DirectCladdingOperation",
-			"version": "2.0"
+			"version": "3.0"
 		}
 	]
 }
