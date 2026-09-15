@@ -41,6 +41,8 @@ public class ExtensionToolPathCalculation :
             operationCom.Invoke(operation =>
                 operation.RegisterHandler("OperationSolverExtension", _operationEventHandler, new ListString(), out status));
             resultStatus = status;
+            if (status.Code != TResultStatusCode.rsError)
+                operationCom.Invoke(OperationSmartHints.Load);
         }
         catch (Exception e)
         {

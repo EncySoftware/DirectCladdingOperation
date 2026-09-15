@@ -17,11 +17,19 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <PackageReference Include="EncySoftware.CAMAPI.SDK.Net" Version="3.0.7-dev.4" />
+    <PackageReference Include="EncySoftware.CAMAPI.SDK.Net" Version="3.0.13-dev" />
   </ItemGroup>
 
   <ItemGroup>
     <None Include="icon.png" Pack="true" PackagePath="\"/>
+    <None Update="DirectCladdingOperation.smarthint" Pack="true" PackagePath="contentFiles\any\any\">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+    </None>
+    <None Update="SmartHintImages\*.png" Pack="true" PackagePath="contentFiles\any\any\SmartHintImages\">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </None>
     <None Include="..\..\README.md" Pack="true" PackagePath="\" />
     <None Include="DirectCladdingOperation_ExtOp.xml" Pack="true" PackagePath="contentFiles\any\any\">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
