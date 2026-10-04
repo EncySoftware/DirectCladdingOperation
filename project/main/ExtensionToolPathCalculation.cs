@@ -385,7 +385,7 @@ public class ExtensionToolPathCalculation :
             {
                 case MovementType.StraightBetweenCurves:
                     cldFormer.OutEffector(1, true);
-                    cldFormer.OutFeed((int)TFeedTypeFlag.affWorking, 200.0, false);
+                    cldFormer.OutStandardFeed((int)TFeedTypeFlag.affWorking);
                     cldFormer.CutTo(firstCurvePoint);
                     break;
                 case MovementType.SafeBetweenCurves:
@@ -405,7 +405,7 @@ public class ExtensionToolPathCalculation :
                     cldFormer.CutTo(firstCurvePoint);
 
                     cldFormer.OutEffector(1, true);
-                    cldFormer.OutFeed((int)TFeedTypeFlag.affWorking, 200.0, false);
+                    cldFormer.OutStandardFeed((int)TFeedTypeFlag.affWorking);
                     cldFormer.CutTo(firstCurvePoint);
 
                     break;
@@ -414,7 +414,7 @@ public class ExtensionToolPathCalculation :
                     cldFormer.CutTo(firstCurvePoint);
 
                     cldFormer.OutEffector(1, true);
-                    cldFormer.OutFeed((int)TFeedTypeFlag.affWorking, 200.0, false);
+                    cldFormer.OutStandardFeed((int)TFeedTypeFlag.affWorking);
                     cldFormer.CutTo(firstCurvePoint);
 
                     break;
@@ -423,7 +423,7 @@ public class ExtensionToolPathCalculation :
                     cldFormer.CutTo(firstCurvePoint);
 
                     cldFormer.OutEffector(1, true);
-                    cldFormer.OutFeed((int)TFeedTypeFlag.affWorking, 200.0, false);
+                    cldFormer.OutStandardFeed((int)TFeedTypeFlag.affWorking);
                     cldFormer.CutTo(firstCurvePoint);
 
                     break;
@@ -439,7 +439,7 @@ public class ExtensionToolPathCalculation :
                     cldFormer.CutTo(firstCurvePoint);
 
                     cldFormer.OutEffector(1, true);
-                    cldFormer.OutFeed((int)TFeedTypeFlag.affWorking, 200.0, false);
+                    cldFormer.OutStandardFeed((int)TFeedTypeFlag.affWorking);
                     cldFormer.CutTo(firstCurvePoint);
 
                     break;
