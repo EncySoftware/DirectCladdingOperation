@@ -1,0 +1,204 @@
+﻿$Application=CAMSmartHint
+$Language=1033
+#TDirectCladdingOP.LinksPlaceHolder.FirstLinkType
+@link-clearance.png
+Text:
+Choose how the tool approaches the first curve: directly, via the safe level, or using the rapid-distance clearance. Check the approach against the workpiece and fixtures.
+
+1 - Direct link.
+2 - Clearance level.
+3 - Vertical clearance above the endpoint.
+#
+#TDirectCladdingOP.LinksPlaceHolder.LastLinkType
+@link-clearance.png
+Text:
+Choose how the tool leaves the final curve: directly, via the safe level, or using the rapid-distance clearance. By default, this follows First link type.
+
+1 - Direct link.
+2 - Clearance level.
+3 - Vertical clearance above the endpoint.
+#
+#TDirectCladdingOP.LinksPlaceHolder.LongLinkType
+@link-clearance.png
+Text:
+Choose the transition used when the distance to the next curve reaches or exceeds the short-link threshold: directly, via the safe level, or using the rapid-distance clearance.
+
+1 - Direct link.
+2 - Clearance level.
+3 - Vertical clearance above the endpoint.
+#
+#TDirectCladdingOP.LinksPlaceHolder.ShortLink
+Text:
+Set the distance threshold for classifying links between curves. Distances below the threshold use Short link type; distances equal to or above it use Long link type. Specify an absolute distance or a percentage of the tool diameter.
+#
+#TDirectCladdingOP.LinksPlaceHolder.ShortLinkType
+@link-clearance.png
+Text:
+Choose the transition used when the distance to the next curve is below the short-link threshold: directly, via the safe level, or using the rapid-distance clearance.
+
+1 - Direct link.
+2 - Clearance level.
+3 - Vertical clearance above the endpoint.
+#
+#TDirectCladdingOP.PrintingStrategy
+@printing-strategy.png
+Text:
+Choose how the input curves are processed. Planar groups curves into layers or features. Helical follows the supplied continuous curves. Prepare the deposition curves in CAD and add them to the job assignment before calculating the toolpath.
+
+1 - Planar strategy.
+2 - Helical strategy.
+#
+#TDirectCladdingOP.PrintingStrategy.Helical
+@printing-strategy.png
+Text:
+Follow the supplied continuous curves. Curves whose start is above their end are reversed to run upward. Enable Optimize order to sort the curves by proximity. This strategy does not generate a helix from planar contours.
+
+1 - Planar strategy.
+2 - Helical strategy.
+#
+#TDirectCladdingOP.PrintingStrategy.Planar
+@printing-strategy.png
+Text:
+Process the supplied layer curves by feature or by layer. Use Sorting to control the processing order, split features into batches, and adjust the start points of closed curves.
+
+1 - Planar strategy.
+2 - Helical strategy.
+#
+#TDirectCladdingOP.RapidDistance
+@link-clearance.png
+Text:
+Vertical clearance above a curve endpoint used by links that retract by the rapid distance. This is an offset from the endpoint, not an absolute Z level.
+
+1 - Direct link.
+2 - Clearance level.
+3 - Vertical clearance above the endpoint.
+#
+#TDirectCladdingOP.Sort.AllowReverse
+@reverse-direction.png
+Text:
+Reverse the traversal direction of closed input curves. Open curves retain their direction. Turn this off when the direction of the supplied closed contours must be preserved.
+
+1 - Original direction.
+2 - Reversed direction.
+#
+#TDirectCladdingOP.Sort.AllowReverse.False
+@reverse-direction-false.png
+Text:
+Preserve the traversal direction of closed input curves. The output contour is traversed in the same direction as the input contour. Start-point selection and processing-order settings still apply.
+
+1 - Input direction.
+2 - Output direction for the closed curve.
+#
+#TDirectCladdingOP.Sort.AllowReverse.True
+@reverse-direction-true.png
+Text:
+Reverse the traversal direction of closed input curves. The output contour is traversed in the opposite direction to the input contour. This option does not reverse open curves.
+
+1 - Input direction.
+2 - Output direction for the closed curve.
+#
+#TDirectCladdingOP.Sort.OptimizeOrder
+@optimize-order.png
+Text:
+Optimize the processing order using proximity between curves or groups within the selected strategy. Disable this option to retain the order produced by grouping without proximity optimization.
+
+Numbers 1-4 indicate the processing sequence in this example.
+#
+#TDirectCladdingOP.Sort.OptimizeOrder.False
+@optimize-order-false.png
+Text:
+Proximity optimization is disabled. Retain the order produced by the selected grouping strategy, or the input curve order for helical printing. This can produce longer links between curves, as illustrated. Grouping and other strategy settings still apply.
+
+Numbers 1-4 indicate the processing sequence in this example.
+#
+#TDirectCladdingOP.Sort.OptimizeOrder.True
+@optimize-order.png
+Text:
+Proximity optimization is enabled. Reorder curves or groups within the selected strategy to reduce travel between them. The illustration shows an example of visiting nearby curves in sequence; the resulting order depends on the input geometry and strategy.
+
+Numbers 1-4 indicate the processing sequence in this example.
+#
+#TDirectCladdingOP.Sort.SortBy
+@sort-feature.png
+Text:
+Choose the grouping used for planar printing. ByFeature processes curves belonging to the same feature together. ByLayer processes curves at the same Z level together.
+
+The two stacks represent separate features. Numbers 1-8 indicate the processing sequence.
+#
+#TDirectCladdingOP.Sort.SortBy.ByFeature
+@sort-feature.png
+Text:
+Group curves into features using their bounding boxes. Process each feature together, or enable Split by layers to alternate between features in batches.
+
+The two stacks represent separate features. Numbers 1-8 indicate the processing sequence.
+#
+#TDirectCladdingOP.Sort.SortBy.ByLayer
+@sort-layer.png
+Text:
+Group curves by their Z level and process the layer groups. Enable Optimize order to optimize the order within the layer processing strategy.
+
+The two stacks represent separate features. Numbers 1-8 indicate the processing sequence.
+#
+#TDirectCladdingOP.Sort.SplitByLayer.Count
+@split-layers.png
+Text:
+Number of consecutive curves taken from each feature in one batch. For input with one curve per layer per feature, this is the number of layers per batch. Use a value greater than 1 to activate splitting; 1 leaves features unsplit.
+
+The two stacks represent separate features with Count = 2. Numbers 1-8 indicate the processing sequence.
+#
+#TDirectCladdingOP.Sort.SplitByLayer.Enabled
+@split-layers.png
+Text:
+Enable batch processing across features. Set Count to a value greater than 1 to split feature curves into batches. Disable this option to process each feature together.
+
+The two stacks represent separate features with Count = 2. Numbers 1-8 indicate the processing sequence.
+#
+#TDirectCladdingOP.Sort.SplitByLayer.Enabled.False
+@sort-feature.png
+Text:
+Batch processing is disabled. Process each feature together without alternating between features in batches. Count has no effect while this option is disabled; the other sorting settings still apply.
+
+The two stacks represent separate features. Numbers 1-8 indicate the processing sequence.
+#
+#TDirectCladdingOP.Sort.SplitByLayer.Enabled.True
+@split-layers.png
+Text:
+Batch processing is enabled for planar printing sorted by feature. With Count greater than 1, process a batch of consecutive curves from each feature before continuing with the next batch. Count = 1 leaves features unsplit.
+
+The two stacks represent separate features with Count = 2. Numbers 1-8 indicate the processing sequence.
+#
+#TDirectCladdingOP.Sort.StartPoint.Mode
+@start-point.png
+Text:
+Choose how to place the start points of closed curves. Do not change keeps the input start points. Nearest uses the machine start position as the initial reference. Manually uses the specified Point as the initial reference. Subsequent curves use the preceding selected point.
+
+1 - Reference point.
+2 - Selected start point.
+3 - Closed curve.
+#
+#TDirectCladdingOP.Sort.StartPoint.Mode.Automatically
+Text:
+Choose a point on the first closed curve nearest to the machine start position, then use the preceding selected point as the reference for subsequent curves.
+#
+#TDirectCladdingOP.Sort.StartPoint.Mode.Default
+Text:
+Keep the start points defined by the input curves.
+#
+#TDirectCladdingOP.Sort.StartPoint.Mode.Manually
+@start-point.png
+Text:
+Use Point as the initial reference for selecting a start point on a closed curve. Subsequent curves use the preceding selected point as their reference.
+
+1 - Reference point.
+2 - Selected start point.
+3 - Closed curve.
+#
+#TDirectCladdingOP.Sort.StartPoint.Point
+@start-point.png
+Text:
+Initial reference position for manual start-point selection. The start point is chosen on the curve near this position, so the reference does not have to lie exactly on the curve.
+
+1 - Reference point.
+2 - Selected start point.
+3 - Closed curve.
+#

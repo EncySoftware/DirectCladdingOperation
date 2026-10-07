@@ -190,6 +190,11 @@ public class Build : NukeBuild
                 using var archive = new ZipArchive(zipToOpen, ZipArchiveMode.Update);
                 archive.CreateEntryFromFile(dllPath, Path.GetFileName(dllPath));
                 archive.CreateEntryFromFile(jsonPath, Path.GetFileName(jsonPath));
+                foreach (var resource in new[] { "DirectCladdingOperation_ExtOp.xml", "DirectCladdingOperation.smarthint" })
+                    archive.CreateEntryFromFile(Path.Combine(outputFolder, resource), resource);
+                var imagesFolder = Path.Combine(outputFolder, "SmartHintImages");
+                foreach (var imagePath in Directory.GetFiles(imagesFolder, "*.png"))
+                    archive.CreateEntryFromFile(imagePath, "SmartHintImages/" + Path.GetFileName(imagePath));
                 Logger.head($"Created dext file: {dextPath}");
             }
         });
