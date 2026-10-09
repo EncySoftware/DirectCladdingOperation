@@ -1,0 +1,67 @@
+# Publishes the extension to the ENCY Extension Store (https://apps.encycam.com).
+#   - push a tag vX.Y.Z         -> publishes version X.Y.Z
+#   - Actions -> Run workflow   -> publishes the version you type; tick "dry run" to only check it
+# No secrets: the run signs in to the store with its own GitHub token (OIDC). The store credits the
+# run to whoever started it, so that person links their GitHub account once in the store profile
+# (apps.encycam.com -> Profile -> Sign in with GitHub) and must own the extension's card there.
+# publish_prod.yml and publish_test.yml (nuget.org) are separate and untouched.
+
+name: Publish to ENCY Extension Store
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish, e.g. 3.0.1'
+        required: true
+      dry-run:
+        description: 'Only check the package on the store, publish nothing'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Resolve version
+        shell: bash
+        env:
+          TYPED_VERSION: ${{ inputs.version }}
+        run: |
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then v="${GITHUB_REF_NAME#v}"; else v="${TYPED_VERSION#v}"; fi
+          if [[ ! "$v" =~ ^[0-9]+\.[0-9]+\.[0-9]+([-.][0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error::'$v' is not a version like 3.0.1"
+            exit 1
+          fi
+          echo "PKG_VERSION=$v" >> "$GITHUB_ENV"
+
+      # Release only: a Debug build reads its smart hints from the source folder.
+      # The ENCY Nexus is a source because EncySoftware.CAMAPI.SDK.Net 3.0.15 is not on nuget.org.
+      # Without it NuGet silently takes the next version up (warning NU1603), and that build does not
+      # load in the ENCY release it targets, so NU1603 is made an error here.
+      - name: Pack
+        shell: bash
+        run: |
+          dotnet pack project/main/DirectCladdingOperationExtension.csproj -c Release \
+            -p:Version="$PKG_VERSION" -p:WarningsAsErrors=NU1603 \
+            --source https://api.nuget.org/v3/index.json \
+            --source https://nexus.encycam.com/repository/master/index.json \
+            -o out
+
+      - name: Publish to the ENCY Extension Store
+        uses: EncySoftware/publish-extension-action@v1
+        with:
+          nupkg: out/*.nupkg
+          dry-run: ${{ github.event_name == 'workflow_dispatch' && inputs.dry-run }}

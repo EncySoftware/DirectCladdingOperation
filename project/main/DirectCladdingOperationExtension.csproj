@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <Authors>ENCY</Authors>
     <PackageId>EncySoftware.DirectCladdingOperation</PackageId>
-    <PackageTags>ency-extension;operationsolver</PackageTags>
+    <PackageTags>ency-extension;operationsolver;CAM;additive;cladding</PackageTags>
     <Description>Operation for ENCY that calculates a toolpath for additive machining by directly transforming input geometric curves into tool movements at given speeds and with specified linking strategy parameters</Description>
     <PackageIcon>icon.png</PackageIcon>
     <PackageProjectUrl>https://github.com/EncySoftware/DirectCladdingOperation</PackageProjectUrl>
@@ -22,19 +22,19 @@
 
   <ItemGroup>
     <None Include="icon.png" Pack="true" PackagePath="\"/>
-    <None Update="DirectCladdingOperation.smarthint" Pack="true" PackagePath="contentFiles\any\any\">
+    <None Update="DirectCladdingOperation.smarthint" Pack="true" PackagePath="build\">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <CopyToPublishDirectory>Always</CopyToPublishDirectory>
     </None>
-    <None Update="SmartHintImages\*.png" Pack="true" PackagePath="contentFiles\any\any\SmartHintImages\">
+    <None Update="SmartHintImages\*.png" Pack="true" PackagePath="build\">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </None>
     <None Include="..\..\README.md" Pack="true" PackagePath="\" />
-    <None Include="DirectCladdingOperation_ExtOp.xml" Pack="true" PackagePath="contentFiles\any\any\">
+    <None Include="DirectCladdingOperation_ExtOp.xml" Pack="true" PackagePath="build\">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="DirectCladdingOperationExtension.settings.json" Pack="true" PackagePath="contentFiles\any\any\">
+    <None Include="DirectCladdingOperationExtension.settings.json" Pack="true" PackagePath="build\">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
